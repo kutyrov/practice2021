@@ -3,6 +3,7 @@ import pymysql.cursors
 
 
 def process_data(data):  # обрабатываем запрос
+    print(data)
     command, args = data.split(' ', 1)
     if command == 'check':
         resp = 'ok\nyou exist\n\n'
@@ -38,7 +39,7 @@ def run_server(host, port):
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        print('shut this beatiful server up')
+        print('shut this beautiful server up')
         pass
 
     server.close()
@@ -46,7 +47,7 @@ def run_server(host, port):
     loop.close()
 
 
-#run_server('127.0.0.1', 8888)
+run_server('127.0.0.1', 8888)
 
 '''
 # подключаемся к БД и считываем всех пользователей
