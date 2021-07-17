@@ -16,6 +16,28 @@ def blind_signature(key):  # функция для подписи ключа п�
     return key
 
 
+def get_data_sql(f_host, f_user, f_db):
+    # подключаемся к БД и считываем всех пользователей
+    try:
+        con = pymysql.connect(host=f_host, user=f_user, db=f_db)
+    except pymysql.err.OperationalError:
+        return None
+    people = {}
+
+    with con:
+
+        cur = con.cursor()
+        cur.execute("SELECT * FROM data")
+
+        rows = cur.fetchall()
+
+        for row in rows:
+            print("{0} {1} {2}".format(row[0], row[1], row[2]))
+            people[int(row[2])] = (str(row[0]), str(row[1]))
+
+        return people
+
+
 class ClientServerProtocol(asyncio.Protocol):
     def connection_made(self, transport):
         self.transport = transport
@@ -28,6 +50,10 @@ class ClientServerProtocol(asyncio.Protocol):
 
 def run_server(host, port):
     print("i am alive and ready for work!")
+    people = get_data_sql(f_host='localhost', f_user='root', f_db='voters')
+    if people is None:
+        print("Error! Can't get data. Maybe DB is unreachable")
+        exit()
     loop = asyncio.get_event_loop()
     coro = loop.create_server(
         ClientServerProtocol,
@@ -48,18 +74,3 @@ def run_server(host, port):
 
 
 run_server('127.0.0.1', 8888)
-
-'''
-# подключаемся к БД и считываем всех пользователей
-con = pymysql.connect(host='localhost', user='root', db='voters')
-
-with con:
-
-    cur = con.cursor()
-    cur.execute("SELECT * FROM data")
-
-    rows = cur.fetchall()
-
-    for row in rows:
-        print("{0} {1} {2}".format(row[0], row[1], row[2]))
-'''
