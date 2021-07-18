@@ -30,10 +30,16 @@ class Client():
 # тестирование
 
 client = Client("127.0.0.1", 8888, timeout=15)
-while True:
-    try:
-        data = input()
-        client.put(data)
-    except KeyboardInterrupt:
-        print('закрываем клиент')
-        break
+# while True:
+try:
+    #data = input()
+    key = ''
+    with open("public.txt") as file_handler:
+        for line in file_handler:
+            key += line
+    # print(key)
+    data = 'check\nПетров Игорь Вячеславович 1987-11-24 2536284637 ' + key + '\n\n'
+    client.put(data)
+except KeyboardInterrupt:
+    print('закрываем клиент')
+    # break

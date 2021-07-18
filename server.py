@@ -3,6 +3,7 @@ import pymysql.cursors
 
 
 def process_data(reqv, people):  # обрабатываем запрос
+    # print(reqv)
     resp = 'error\n\n'
     try:
         command, args, _ = reqv.split('\n', 2)
@@ -15,22 +16,48 @@ def process_data(reqv, people):  # обрабатываем запрос
             birthday = str(args[3])
             passport_id = int(args[4])
             key = args[5]
+            # print(key)
         except ValueError:
             return resp
+        # как вариант можно не хранить всех пользователей в global data а каждый раз делать запрос к серверу по данным
         if passport_id in people:
             if people[passport_id][0] == name and people[passport_id][1] == birthday:
                 resp = 'ok\nyou exist\n\n'
-                # resp = blind_signature(key)
+                #resp = 'ok\n'+blind_signature(key).decode()+'\n\n'
+                # print(blind_signature(key))
+                #new_key = blind_signature(key)
+
+                # sign[len(sign)/2:] + sign[:len(sign)/2
                 return resp
     return resp
 
 
 def blind_signature(key):  # функция для подписи ключа пользователя
-    return key
+    # это пример для 34.10-2012 нужно заменить на 34.10-2001
+    # или же можно и не менять не зря же гост заменили ¯\_(ツ)_/¯
+    from pygost.gost3410 import CURVES
+    curve = CURVES["id-tc26-gost-3410-12-512-paramSetA"]
+    from os import urandom
+    prv_raw = urandom(64)
+    from pygost.gost3410 import prv_unmarshal
+    prv = prv_unmarshal(prv_raw)
+    from pygost.gost3410 import public_key
+    pub = public_key(curve, prv)
+    from pygost.gost3410 import pub_marshal
+    from pygost.utils import hexenc
+    # print "Public key is:", hexenc(pub_marshal(pub))
+    from pygost import gost34112012512
+    data_for_signing = key.encode()  # единственная измененная строка
+    dgst = gost34112012512.new(data_for_signing).digest()[::-1]
+    from pygost.gost3410 import sign
+    signature = sign(curve, prv, dgst)
+    return signature
 
 
 def get_data_sql(f_host, f_user, f_db):
     # подключаемся к БД и считываем всех пользователей
+    # возможно стоит добавить графу пароль для проверки, отправившего запрос
+    # людей, прочитавших этот коммент прошу сообщить мне об этом :)
     try:
         con = pymysql.connect(host=f_host, user=f_user, db=f_db)
     except pymysql.err.OperationalError:
