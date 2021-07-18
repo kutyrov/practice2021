@@ -1,5 +1,6 @@
 import asyncio
 import pymysql.cursors
+from base64 import b64encode
 
 
 def process_data(reqv, people):  # обрабатываем запрос
@@ -22,11 +23,12 @@ def process_data(reqv, people):  # обрабатываем запрос
         # как вариант можно не хранить всех пользователей в global data а каждый раз делать запрос к серверу по данным
         if passport_id in people:
             if people[passport_id][0] == name and people[passport_id][1] == birthday:
-                resp = 'ok\nyou exist\n\n'
-                #resp = 'ok\n'+blind_signature(key).decode()+'\n\n'
+                #resp = 'ok\nyou exist\n\n'
+                resp = 'ok\n' + \
+                    b64encode(blind_signature(key)).decode('utf-8')+'\n\n'
                 # print(blind_signature(key))
                 #new_key = blind_signature(key)
-
+                # blind_signature(key)
                 # sign[len(sign)/2:] + sign[:len(sign)/2
                 return resp
     return resp
@@ -35,6 +37,7 @@ def process_data(reqv, people):  # обрабатываем запрос
 def blind_signature(key):  # функция для подписи ключа пользователя
     # это пример для 34.10-2012 нужно заменить на 34.10-2001
     # или же можно и не менять не зря же гост заменили ¯\_(ツ)_/¯
+
     from pygost.gost3410 import CURVES
     curve = CURVES["id-tc26-gost-3410-12-512-paramSetA"]
     from os import urandom
@@ -43,14 +46,18 @@ def blind_signature(key):  # функция для подписи ключа п�
     prv = prv_unmarshal(prv_raw)
     from pygost.gost3410 import public_key
     pub = public_key(curve, prv)
+    #print(b64encode(prv_raw).decode('utf-8'), prv, pub)
     from pygost.gost3410 import pub_marshal
     from pygost.utils import hexenc
-    # print "Public key is:", hexenc(pub_marshal(pub))
+    #print("Public key is:", hexenc(pub_marshal(pub)))
     from pygost import gost34112012512
-    data_for_signing = key.encode()  # единственная измененная строка
+    #data_for_signing = key.encode()
+    data_for_signing = b'somt text'  # единственная измененная строка
     dgst = gost34112012512.new(data_for_signing).digest()[::-1]
+
     from pygost.gost3410 import sign
     signature = sign(curve, prv, dgst)
+    #print(b64encode(signature).decode('utf-8'), prv, pub)
     return signature
 
 
