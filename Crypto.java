@@ -153,4 +153,19 @@ public class Crypto {
         return (PrivateKey)ks.getKey(keystore_name, STORE_PASS);
     }
 
+    // пример использования функций
+    
+    // public static void main(String[] argv) {
+    //     try {
+    //         String bulletin = "За Орду!";
+    //         String keystoreName = "gost_on_token";
+    //         byte[] signed = sign(bulletin, getPrivateFromKeystore(keystoreName));
+    //         System.out.println(toHexString(signed));
+    //         System.out.println(verify(signed, bulletin, getPublicFromCertificate(getCertificateFromKeystore(keystoreName))));
+    //     }
+    //     catch (Exception e) {
+    //         System.out.println("Exception thrown : " + e);
+    //     } 
+    // }
+
 }
