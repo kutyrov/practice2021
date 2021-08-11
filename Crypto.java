@@ -22,7 +22,7 @@ import java.security.cert.Certificate;
 import ru.CryptoPro.JCPRequest.GostCertificateRequest;
 import java.io.*;
 
-public class Crypto() {
+public class Crypto {
     public Crypto() throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeySpecException {
         // Generation
 //        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -111,7 +111,7 @@ public class Crypto() {
         return ss.toString();
     }
 
-    public static String sign(String text, PrivateKey privateKey) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
+    public static byte[] sign(String text, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         final Signature sign = Signature.getInstance(JCP.GOST_SIGN_2012_512_NAME);
         sign.initSign(privateKey);
         sign.update(text.getBytes());
@@ -120,7 +120,7 @@ public class Crypto() {
         return signEL;
     }
 
-    public static boolean verify(byte[] signEL, String text, PublicKey publicKey) {
+    public static boolean verify(byte[] signEL, String text, PublicKey publicKey) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
         final Signature sig = Signature.getInstance(JCP.GOST_SIGN_2012_512_NAME);
         sig.initVerify(publicKey);
         sig.update(text.getBytes());
@@ -129,21 +129,21 @@ public class Crypto() {
         return signELver;
     }
 
-    public static Certificate getCertificateFromKeystore(String keystoreName) {
+    public static Certificate getCertificateFromKeystore(String keystoreName) throws KeyStoreException, IOException, NoSuchProviderException, NoSuchAlgorithmException, CertificateException {
         KeyStore ks = KeyStore.getInstance("J6CFStore", "JCP");
 
         //char[] STORE_PASS = new char[] {'1', '2', '3', '4'};
-        String keystore_name = "gost_on_token";
+        //String keystore_name = "gost_on_token";
 
         ks.load(null, null);
-        return ks.getCertificate(keystore_name);
+        return ks.getCertificate(keystoreName);
     }
 
     public static PublicKey getPublicFromCertificate(Certificate cert) {
         return cert.getPublicKey();
     }
 
-    public static PrivateKey getPrivateFromKeystore(KeyStore ks, String keystoreName) {
+    public static PrivateKey getPrivateFromKeystore(String keystoreName) throws KeyStoreException, IOException, NoSuchProviderException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
         KeyStore ks = KeyStore.getInstance("J6CFStore", "JCP");
 
         char[] STORE_PASS = new char[] {'1', '2', '3', '4'};
